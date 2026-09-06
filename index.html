@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>EggX – Eier-Timer</title>
-<meta name="description" content="EggX – der futuristische Eier-Timer für dein iPhone." />
+<title>G04EggX – Eier-Timer</title>
+<meta name="description" content="G04EggX – der futuristische Eier-Timer für dein iPhone." />
 <link rel="manifest" href="manifest.json" />
 
 <!-- Favicon (Browser-Tab) -->
@@ -15,7 +15,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="EggX" />
+<meta name="apple-mobile-web-app-title" content="G04EggX" />
 
 <!-- Android/Chrome Homescreen-Icon -->
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
@@ -220,7 +220,7 @@ function playSound(soundId, ctx) {
   }
 }
 
-function EggX() {
+function G04EggX() {
   const [presetId, setPresetId] = useState("mittel");
   const preset = PRESETS.find((p) => p.id === presetId);
   const total = preset.minutes * 60;
@@ -362,10 +362,10 @@ function EggX() {
   const enableBackgroundPush = useCallback(async () => {
     if (!PUSH_API_URL) throw new Error("Der Cloudflare Push-Server ist noch nicht verbunden.");
     if (!pushSupported()) {
-      if (isIOSDevice() && !isStandaloneApp()) throw new Error("EggX zuerst zum iPhone-Home-Bildschirm hinzufügen und von dort öffnen.");
+      if (isIOSDevice() && !isStandaloneApp()) throw new Error("G04EggX zuerst zum iPhone-Home-Bildschirm hinzufügen und von dort öffnen.");
       throw new Error("Dieser Browser unterstützt keine Hintergrund-Mitteilungen.");
     }
-    if (isIOSDevice() && !isStandaloneApp()) throw new Error("EggX zuerst zum iPhone-Home-Bildschirm hinzufügen und von dort öffnen.");
+    if (isIOSDevice() && !isStandaloneApp()) throw new Error("G04EggX zuerst zum iPhone-Home-Bildschirm hinzufügen und von dort öffnen.");
     const permission = await Notification.requestPermission();
     if (permission !== "granted") throw new Error("Mitteilungen wurden nicht erlaubt.");
     const keyResponse = await fetch(`${PUSH_API_URL}/vapid-public-key`);
@@ -505,7 +505,7 @@ function EggX() {
         <div className="app-content w-full h-full mx-auto flex flex-col" style={{ maxWidth: "430px" }}>
           <div className="flex items-center justify-between mb-2 shrink-0">
             <span className="font-mono text-lg tracking-[0.15em] font-bold" style={{ color: glowColor, textShadow: `0 0 12px ${glowColor}` }}>
-              EGGX
+              G04EggX
             </span>
             <span
               className="text-[10px] uppercase tracking-[0.25em] font-bold px-2.5 py-1 rounded-full border"
@@ -794,7 +794,7 @@ function EggX() {
 }
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<EggX />);
+root.render(<G04EggX />);
 </script>
 </body>
 </html>

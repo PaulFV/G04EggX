@@ -1,4 +1,4 @@
-const CACHE_NAME = "eggx-v1";
+const CACHE_NAME = "g04eggx-v2";
 const APP_ASSETS = [
   "./",
   "./index.html",
@@ -50,7 +50,7 @@ self.addEventListener("fetch", (event) => {
 
 self.addEventListener("push", (event) => {
   const fallback = {
-    title: "EggX – Fertig!",
+    title: "G04EggX – Fertig!",
     body: "Dein Ei ist fertig gekocht. 🥚",
     tag: "eggx-timer",
     url: "./"

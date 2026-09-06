@@ -60,7 +60,7 @@ async function sendNotification(env, subscription, timer, test = false) {
   webpush.setVapidDetails(env.VAPID_SUBJECT, env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY);
   const hardness = PRESET_NAMES[timer?.presetId] || "perfekt";
   return webpush.sendNotification(subscription, JSON.stringify({
-    title: test ? "EggX Test" : "EggX – Fertig!",
+    title: test ? "G04EggX Test" : "G04EggX – Fertig!",
     body: test ? "Hintergrund-Mitteilungen funktionieren. 🥚" : `Dein Ei ist jetzt ${hardness} gekocht. 🥚`,
     tag: test ? "eggx-test" : "eggx-timer",
     url: env.APP_URL

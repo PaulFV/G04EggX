@@ -1,4 +1,4 @@
-# EggX 🥚
+# G04EggX 🥚
 
 Ein futuristischer Eier-Kochtimer im Browser – mit animiertem Ei, flüssigem Eigelb, das beim Garen fest wird, aufsteigendem Rauch und wiederholendem Alarmton.
 
@@ -23,12 +23,12 @@ Für die Timer-Grundfunktion reicht `index.html`. PWA-, Offline- und Push-Funkti
 
 ### Auf dem iPhone installieren
 
-1. [EggX](https://paulfv.github.io/EggX/) in Safari öffnen.
+1. [G04EggX](https://paulfv.github.io/EggX/) in Safari öffnen.
 2. **Teilen → Zum Home-Bildschirm** wählen.
-3. EggX vom neuen Home-Bildschirm-Symbol starten. Die App nutzt dann die gesamte verfügbare Anzeige inklusive korrekter Safe Areas.
-4. In EggX **Mitteilungen aus** antippen und die iOS-Abfrage erlauben.
+3. G04EggX vom neuen Home-Bildschirm-Symbol starten. Die App nutzt dann die gesamte verfügbare Anzeige inklusive korrekter Safe Areas.
+4. In G04EggX **Mitteilungen aus** antippen und die iOS-Abfrage erlauben.
 
-Web Push auf dem iPhone setzt iOS/iPadOS 16.4 oder neuer sowie den Start als Home-Bildschirm-App voraus. Der ausgewählte EggX-Alarmton spielt bei geöffneter App; Hintergrund-Push verwendet den System-Mitteilungston von iOS.
+Web Push auf dem iPhone setzt iOS/iPadOS 16.4 oder neuer sowie den Start als Home-Bildschirm-App voraus. Der ausgewählte G04EggX-Alarmton spielt bei geöffneter App; Hintergrund-Push verwendet den System-Mitteilungston von iOS.
 
 ### Mit GitHub Pages hosten
 

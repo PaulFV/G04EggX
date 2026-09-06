@@ -1,6 +1,6 @@
-# EggX Push Worker
+# G04EggX Push Worker
 
-Der Worker speichert pro Browser eine Web-Push-Anmeldung in einem eigenen Durable Object. Der Timer-Endzeitpunkt wird als Durable-Object-Alarm geplant, sodass die Mitteilung auch bei geschlossener EggX-App gesendet werden kann.
+Der Worker speichert pro Browser eine Web-Push-Anmeldung in einem eigenen Durable Object. Der Timer-Endzeitpunkt wird als Durable-Object-Alarm geplant, sodass die Mitteilung auch bei geschlossener G04EggX-App gesendet werden kann.
 
 ## Bereitstellung
 
