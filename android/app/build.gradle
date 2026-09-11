@@ -1,0 +1,48 @@
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "de.g04eggx.app"
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "de.g04eggx.app"
+        minSdk 23
+        targetSdk 36
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    // Die Release-Signatur wird nur in CI aktiviert, wenn die GitHub-Secrets
+    // gesetzt sind. Keystore-Dateien und Passwörter gehören nie ins Repository.
+    def releaseKeystoreFile = System.getenv("ANDROID_KEYSTORE_FILE")
+    buildTypes {
+        release {
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+    }
+
+    if (releaseKeystoreFile && file(releaseKeystoreFile).exists()) {
+        signingConfigs {
+            release {
+                storeFile file(releaseKeystoreFile)
+                storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+            }
+        }
+        buildTypes.release.signingConfig = signingConfigs.release
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation "com.google.androidbrowserhelper:androidbrowserhelper:2.7.3"
+}

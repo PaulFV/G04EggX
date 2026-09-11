@@ -2,7 +2,7 @@
 
 Ein futuristischer Eier-Kochtimer im Browser – mit animiertem Ei, flüssigem Eigelb, das beim Garen fest wird, aufsteigendem Rauch und wiederholendem Alarmton.
 
-**[➡️ Live-Demo ansehen](https://paulfv.github.io/EggX/)**
+**[➡️ Live-Demo ansehen](https://paulfv.github.io/G04EggX/)**
 
 ## Features
 
@@ -23,7 +23,7 @@ Für die Timer-Grundfunktion reicht `index.html`. PWA-, Offline- und Push-Funkti
 
 ### Auf dem iPhone installieren
 
-1. [G04EggX](https://paulfv.github.io/EggX/) in Safari öffnen.
+1. [G04EggX](https://paulfv.github.io/G04EggX/) in Safari öffnen.
 2. **Teilen → Zum Home-Bildschirm** wählen.
 3. G04EggX vom neuen Home-Bildschirm-Symbol starten. Die App nutzt dann die gesamte verfügbare Anzeige inklusive korrekter Safe Areas.
 4. In G04EggX **Mitteilungen aus** antippen und die iOS-Abfrage erlauben.
@@ -40,6 +40,12 @@ Web Push auf dem iPhone setzt iOS/iPadOS 16.4 oder neuer sowie den Start als Hom
 
 Der Ordner `worker/` enthält den Cloudflare Worker. Nach dem Deploy dessen URL in `push-config.js` eintragen. Eine vollständige Anleitung steht in [`worker/README.md`](worker/README.md).
 
+### Android-App für Google Play
+
+Der Ordner [`android/`](android/) enthält eine Trusted-Web-Activity-Hülle für den
+Play Store. Die Build- und Signaturanleitung steht in [`android/README.md`](android/README.md);
+der GitHub-Actions-Workflow liegt unter [`.github/workflows/android-build.yml`](.github/workflows/android-build.yml).
+
 ## Tech-Stack
 
 - [React 18](https://react.dev/) (UMD, per CDN)
@@ -55,4 +61,4 @@ Der Tailwind-CDN-Build ist für Prototypen gedacht; für den produktiven Einsatz
 
 ## Lizenz
 
-MIT – siehe [LICENSE](LICENSE)
+MIT – siehe [LICENSE](LICENSE). Für die Veröffentlichung: [Datenschutz](datenschutz.html) und [Impressum/Copyright](impressum.html).

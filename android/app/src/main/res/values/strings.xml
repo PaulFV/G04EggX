@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">G04EggX</string>
+    <string name="launch_url">https://paulfv.github.io/G04EggX/</string>
+    <string name="provider_authority">de.g04eggx.app.fileprovider</string>
+    <string name="asset_statements">[{&quot;relation&quot;:[&quot;delegate_permission/common.handle_all_urls&quot;],&quot;target&quot;:{&quot;namespace&quot;:&quot;web&quot;,&quot;site&quot;:&quot;https://paulfv.github.io&quot;}}]</string>
+</resources>
