@@ -79,15 +79,6 @@ function Volume2({ size = 14 }) {
     </svg>
   );
 }
-function Bell({ size = 14 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
-      <path d="M10 21h4" />
-    </svg>
-  );
-}
-
 const PRESETS = [
   { id: "wachsweich", label: "Wachsw.", minutes: 4, neon: "#00FFC6", neon2: "#00B88F", finalHardness: 0.32 },
   { id: "weich", label: "Weich", minutes: 5, neon: "#00F0FF", neon2: "#00A8FF", finalHardness: 0.5 },
@@ -230,7 +221,6 @@ function G04EggX() {
   const [running, setRunning] = useState(false);
   const [done, setDone] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(() => localStorage.getItem("eggx_pushEnabled") === "true");
-  const [pushBusy, setPushBusy] = useState(false);
   const [pushStatus, setPushStatus] = useState("");
   const intervalRef = useRef(null);
   const alarmIntervalRef = useRef(null);
@@ -252,7 +242,7 @@ function G04EggX() {
     } else if (Notification.permission === "denied") {
       setPushStatus("Mitteilungen sind im System blockiert");
     } else {
-      setPushStatus(pushEnabled ? "Mitteilungen aktiv" : "Mitteilungen aus");
+      setPushStatus(pushEnabled ? "Mitteilungen aktiv" : "Mitteilungen werden beim ersten Start aktiviert");
     }
   }, [pushEnabled]);
 
@@ -380,52 +370,10 @@ function G04EggX() {
         applicationServerKey: base64UrlToBytes(publicKey),
       });
     }
+    await syncPushSchedule(running && endTimeRef.current ? endTimeRef.current : null, subscription);
     localStorage.setItem("eggx_pushEnabled", "true");
     setPushEnabled(true);
-    await syncPushSchedule(running && endTimeRef.current ? endTimeRef.current : null, subscription);
   }, [getPushRegistration, running, syncPushSchedule]);
-
-  const disableBackgroundPush = useCallback(async () => {
-    const deviceId = localStorage.getItem("eggx_pushDeviceId");
-    if (PUSH_API_URL && deviceId) {
-      await pushRequest(`/api/devices/${encodeURIComponent(deviceId)}`, { method: "DELETE" });
-    }
-    if (pushSupported()) {
-      const registration = await getPushRegistration();
-      const subscription = await registration.pushManager.getSubscription();
-      if (subscription) await subscription.unsubscribe();
-    }
-    localStorage.setItem("eggx_pushEnabled", "false");
-    setPushEnabled(false);
-    setPushStatus("Mitteilungen aus");
-  }, [getPushRegistration]);
-
-  const togglePush = async () => {
-    setPushBusy(true);
-    setPushStatus(pushEnabled ? "Mitteilungen werden ausgeschaltet …" : "Mitteilungen werden aktiviert …");
-    try {
-      if (pushEnabled) await disableBackgroundPush();
-      else await enableBackgroundPush();
-    } catch (error) {
-      setPushStatus(error.message || "Mitteilungen konnten nicht geändert werden");
-    } finally {
-      setPushBusy(false);
-    }
-  };
-
-  const testPush = async () => {
-    setPushBusy(true);
-    setPushStatus("Test wird gesendet …");
-    try {
-      const { deviceId } = getPushIdentity();
-      await pushRequest(`/api/devices/${encodeURIComponent(deviceId)}/test`, { method: "POST", body: "{}" });
-      setPushStatus("Test gesendet");
-    } catch (error) {
-      setPushStatus(error.message || "Test konnte nicht gesendet werden");
-    } finally {
-      setPushBusy(false);
-    }
-  };
 
   useEffect(() => {
     if (running) {
@@ -465,7 +413,19 @@ function G04EggX() {
     const triggerAt = Date.now() + remaining * 1000;
     endTimeRef.current = triggerAt;
     setRunning(true);
-    if (pushEnabled) syncPushSchedule(triggerAt).catch((error) => setPushStatus(error.message || "Hintergrund-Timer konnte nicht geplant werden"));
+    if (pushEnabled) {
+      syncPushSchedule(triggerAt).catch((error) => setPushStatus(error.message || "Hintergrund-Timer konnte nicht geplant werden"));
+    } else if (PUSH_API_URL) {
+      // Die erste Nutzeraktion darf die iOS/Android-Berechtigungsabfrage öffnen.
+      // Danach werden Push-Anmeldung und Timer automatisch synchronisiert.
+      enableBackgroundPush()
+        .then(() => {
+          if (endTimeRef.current === triggerAt) return syncPushSchedule(triggerAt);
+        })
+        .catch((error) => setPushStatus(error.message || "Mitteilungen konnten nicht aktiviert werden"));
+    } else {
+      setPushStatus("Push-Server noch nicht verbunden");
+    }
   };
 
   const reset = () => {
@@ -682,29 +642,9 @@ function G04EggX() {
             ))}
           </div>
 
-          <div className="mb-2 shrink-0">
-            <div className="grid grid-cols-[1fr_auto] gap-2">
-              <button
-                type="button"
-                onClick={togglePush}
-                disabled={pushBusy || !PUSH_API_URL}
-                className="min-h-9 flex items-center justify-center gap-2 rounded-lg px-3 text-[11px] font-semibold border disabled:opacity-45 focus:outline-none focus-visible:ring-2"
-                style={{ borderColor: pushEnabled ? glowColor : "#2A2C45", color: pushEnabled ? glowColor : "#9CA0BD", backgroundColor: pushEnabled ? `${glowColor}12` : "transparent" }}
-              >
-                <Bell size={14} /> Mitteilungen {pushEnabled ? "an" : "aus"}
-              </button>
-              <button
-                type="button"
-                onClick={testPush}
-                disabled={pushBusy || !pushEnabled}
-                className="min-h-9 rounded-lg px-3 text-[11px] font-semibold border disabled:opacity-35 focus:outline-none focus-visible:ring-2"
-                style={{ borderColor: "#2A2C45", color: glowColor }}
-              >
-                Test
-              </button>
-            </div>
-            <p className="mt-1 mb-0 truncate text-center text-[10px] text-[#7A7E9E]" title={pushStatus} aria-live="polite">{pushStatus}</p>
-          </div>
+          {pushStatus && (
+            <p className="mb-2 truncate text-center text-[10px] text-[#7A7E9E]" title={pushStatus} aria-live="polite">{pushStatus}</p>
+          )}
 
           <div className="flex items-center gap-3 shrink-0">
             <button

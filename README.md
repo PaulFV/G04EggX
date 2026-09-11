@@ -26,7 +26,7 @@ Für die Timer-Grundfunktion reicht `index.html`. PWA-, Offline- und Push-Funkti
 1. [G04EggX](https://paulfv.github.io/G04EggX/) in Safari öffnen.
 2. **Teilen → Zum Home-Bildschirm** wählen.
 3. G04EggX vom neuen Home-Bildschirm-Symbol starten. Die App nutzt dann die gesamte verfügbare Anzeige inklusive korrekter Safe Areas.
-4. In G04EggX **Mitteilungen aus** antippen und die iOS-Abfrage erlauben.
+4. Beim ersten **Start** die iOS-Abfrage für Mitteilungen erlauben. Die Hintergrund-Mitteilungen werden danach automatisch für jeden Timer verwendet; ein Ein-/Aus- oder Test-Button ist nicht nötig.
 
 Web Push auf dem iPhone setzt iOS/iPadOS 16.4 oder neuer sowie den Start als Home-Bildschirm-App voraus. Der ausgewählte G04EggX-Alarmton spielt bei geöffneter App; Hintergrund-Push verwendet den System-Mitteilungston von iOS.
 
