@@ -508,8 +508,8 @@ function G04EggX() {
               style={
                 running
                   ? {
-                      width: "clamp(148px, 50vw, 250px)",
-                      maxHeight: "min(41dvh, 270px)",
+                      width: "clamp(154px, 52vw, 260px)",
+                      maxHeight: "min(43dvh, 280px)",
                       height: "auto",
                       animationName: "eggBoil, eggPulse",
                       animationDuration: `${(1.9 - progress * 1.2).toFixed(2)}s, ${(2.6 - progress * 1.2).toFixed(2)}s`,
@@ -519,8 +519,8 @@ function G04EggX() {
                     }
                   : done
                   ? {
-                      width: "clamp(148px, 50vw, 250px)",
-                      maxHeight: "min(41dvh, 270px)",
+                      width: "clamp(154px, 52vw, 260px)",
+                      maxHeight: "min(43dvh, 280px)",
                       height: "auto",
                       animationName: "eggAlarmJump, eggPulse",
                       animationDuration: "0.5s, 0.5s",
@@ -528,8 +528,8 @@ function G04EggX() {
                       animationIterationCount: "infinite, infinite",
                     }
                   : {
-                      width: "clamp(148px, 50vw, 250px)",
-                      maxHeight: "min(41dvh, 270px)",
+                      width: "clamp(154px, 52vw, 260px)",
+                      maxHeight: "min(43dvh, 280px)",
                       height: "auto",
                       animationName: "eggFloat",
                       animationDuration: "3.6s",
@@ -726,7 +726,7 @@ function G04EggX() {
         }
         @media (max-height: 700px) {
           .app-shell { padding-top: max(8px, var(--safe-top)); padding-bottom: max(8px, var(--safe-bottom)); }
-          .egg-stage svg { max-height: 33dvh !important; }
+          .egg-stage svg { max-height: 35dvh !important; }
           .egg-stage { margin-bottom: 4px !important; }
         }
         @media (prefers-reduced-motion: reduce) {
