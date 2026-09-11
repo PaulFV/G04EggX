@@ -508,8 +508,8 @@ function G04EggX() {
               style={
                 running
                   ? {
-                      width: "clamp(136px, 45vw, 225px)",
-                      maxHeight: "min(37dvh, 245px)",
+                      width: "clamp(144px, 48vw, 240px)",
+                      maxHeight: "min(40dvh, 260px)",
                       height: "auto",
                       animationName: "eggBoil, eggPulse",
                       animationDuration: `${(1.9 - progress * 1.2).toFixed(2)}s, ${(2.6 - progress * 1.2).toFixed(2)}s`,
@@ -519,8 +519,8 @@ function G04EggX() {
                     }
                   : done
                   ? {
-                      width: "clamp(136px, 45vw, 225px)",
-                      maxHeight: "min(37dvh, 245px)",
+                      width: "clamp(144px, 48vw, 240px)",
+                      maxHeight: "min(40dvh, 260px)",
                       height: "auto",
                       animationName: "eggAlarmJump, eggPulse",
                       animationDuration: "0.5s, 0.5s",
@@ -528,8 +528,8 @@ function G04EggX() {
                       animationIterationCount: "infinite, infinite",
                     }
                   : {
-                      width: "clamp(136px, 45vw, 225px)",
-                      maxHeight: "min(37dvh, 245px)",
+                      width: "clamp(144px, 48vw, 240px)",
+                      maxHeight: "min(40dvh, 260px)",
                       height: "auto",
                       animationName: "eggFloat",
                       animationDuration: "3.6s",
@@ -585,12 +585,12 @@ function G04EggX() {
             </svg>
 
             <div
-              className="mt-3 font-mono tabular-nums tracking-tight font-bold"
+              className="mt-5 font-mono tabular-nums tracking-tight font-bold"
               style={{ fontSize: "clamp(28px, 9vw, 40px)", color: "#F4F6FF", textShadow: `0 0 18px ${glowColor}99, 0 0 4px ${glowColor}` }}
             >
               {formatTime(remaining)}
             </div>
-            <div className="mt-2 text-sm font-medium" style={{ color: glowColor }}>
+            <div className="mt-3 text-sm font-medium" style={{ color: glowColor }}>
               {preset.label} · {preset.minutes} Min
             </div>
           </div>
@@ -726,7 +726,7 @@ function G04EggX() {
         }
         @media (max-height: 700px) {
           .app-shell { padding-top: max(8px, var(--safe-top)); padding-bottom: max(8px, var(--safe-bottom)); }
-          .egg-stage svg { max-height: 30dvh !important; }
+          .egg-stage svg { max-height: 32dvh !important; }
           .egg-stage { margin-bottom: 4px !important; }
         }
         @media (prefers-reduced-motion: reduce) {
