@@ -240,7 +240,7 @@ function G04EggX() {
     } else if (!pushSupported()) {
       setPushStatus(isIOSDevice() && !isStandaloneApp() ? "Für Push zum Home-Bildschirm hinzufügen" : "Push wird nicht unterstützt");
     } else if (Notification.permission === "denied") {
-      setPushStatus("Mitteilungen sind im System blockiert");
+      setPushStatus("");
     } else {
       setPushStatus(pushEnabled ? "Mitteilungen aktiv" : "Mitteilungen werden beim ersten Start aktiviert");
     }
