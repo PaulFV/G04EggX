@@ -1,7 +1,8 @@
 {
-  "name": "G04EggX – Eier-Timer",
+  "name": "G04EggX – Egg Timer",
   "short_name": "G04EggX",
-  "description": "Ein futuristischer Eier-Timer mit Hintergrund-Benachrichtigungen.",
+  "description": "A futuristic egg timer with background notifications.",
+  "lang": "en",
   "id": "./",
   "start_url": "./",
   "scope": "./",

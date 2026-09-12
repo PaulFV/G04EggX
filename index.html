@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>G04EggX – Eier-Timer</title>
-<meta name="description" content="G04EggX – der futuristische Eier-Timer für dein iPhone." />
+<title>G04EggX – Egg Timer</title>
+<meta name="description" content="G04EggX – the futuristic egg timer for your phone." />
 <link rel="manifest" href="manifest.json" />
 
 <!-- Favicon (Browser-Tab) -->
@@ -80,20 +80,128 @@ function Volume2({ size = 14 }) {
   );
 }
 const PRESETS = [
-  { id: "wachsweich", label: "Wachsw.", minutes: 4, neon: "#00FFC6", neon2: "#00B88F", finalHardness: 0.32 },
-  { id: "weich", label: "Weich", minutes: 5, neon: "#00F0FF", neon2: "#00A8FF", finalHardness: 0.5 },
-  { id: "mittel", label: "Mittel", minutes: 7, neon: "#FF6BFF", neon2: "#B026FF", finalHardness: 0.72 },
-  { id: "hart", label: "Hart", minutes: 10, neon: "#FF2D6B", neon2: "#FF0044", finalHardness: 0.9 },
-  { id: "sehrhart", label: "S. Hart", minutes: 12, neon: "#FF7A00", neon2: "#FF3D00", finalHardness: 1 },
+  { id: "wachsweich", minutes: 4, neon: "#00FFC6", neon2: "#00B88F", finalHardness: 0.32 },
+  { id: "weich", minutes: 5, neon: "#00F0FF", neon2: "#00A8FF", finalHardness: 0.5 },
+  { id: "mittel", minutes: 7, neon: "#FF6BFF", neon2: "#B026FF", finalHardness: 0.72 },
+  { id: "hart", minutes: 10, neon: "#FF2D6B", neon2: "#FF0044", finalHardness: 0.9 },
+  { id: "sehrhart", minutes: 12, neon: "#FF7A00", neon2: "#FF3D00", finalHardness: 1 },
 ];
 
 const SOUNDS = [
-  { id: "chime", label: "Chime" },
-  { id: "beep", label: "Beep" },
-  { id: "melodie", label: "Melodie" },
-  { id: "puls", label: "Puls" },
-  { id: "sirene", label: "Sirene" },
+  { id: "chime" },
+  { id: "beep" },
+  { id: "melodie" },
+  { id: "puls" },
+  { id: "sirene" },
 ];
+
+const TRANSLATIONS = {
+  en: {
+    "page.title": "G04EggX – Egg Timer",
+    "page.description": "G04EggX – the futuristic egg timer for your phone.",
+    "language.label": "Language",
+    "language.english": "English",
+    "language.german": "German",
+    "status.done": "Finished",
+    "status.running": "Cooking",
+    "status.ready": "Ready",
+    "preset.wachsweich": "Very soft",
+    "preset.weich": "Soft",
+    "preset.mittel": "Medium",
+    "preset.hart": "Hard",
+    "preset.sehrhart": "Very hard",
+    "sound.chime": "Chime",
+    "sound.beep": "Beep",
+    "sound.melodie": "Melody",
+    "sound.puls": "Pulse",
+    "sound.sirene": "Siren",
+    "unit.minutes": "min",
+    "alarm.label": "Alarm sound",
+    "button.stop": "Stop",
+    "button.pause": "Pause",
+    "button.start": "Start",
+    "button.resume": "Resume",
+    "button.reset": "Reset",
+    "done.message": "Your egg is perfectly cooked: {hardness} 🥚",
+    "link.privacy": "Privacy",
+    "link.imprint": "Legal notice / Copyright",
+    "push.serverNotConfigured": "Push server is not configured yet",
+    "push.addToHome": "Add to the Home Screen to enable push notifications",
+    "push.unsupported": "Push notifications are not supported",
+    "push.active": "Notifications active",
+    "push.firstStart": "Notifications will be enabled on first use",
+    "push.offline": "Offline functionality could not be started",
+    "push.timerScheduled": "Timer-end notification scheduled",
+    "push.serverDisconnected": "The Cloudflare push server is not connected yet",
+    "push.homeScreenFirst": "Add G04EggX to the iPhone Home Screen and open it from there",
+    "push.backgroundUnsupported": "This browser does not support background notifications",
+    "push.permissionDenied": "Notifications were not allowed",
+    "push.serverUnavailable": "The push server is not reachable",
+    "push.notReady": "The push server is not fully configured yet",
+    "push.serviceWorkerUnsupported": "Service workers are not supported",
+    "push.noSubscription": "No active push subscription found",
+    "push.timerPauseError": "The background timer could not be paused",
+    "push.timerScheduleError": "The background timer could not be scheduled",
+    "push.enableError": "Notifications could not be enabled",
+  },
+  de: {
+    "page.title": "G04EggX – Eier-Timer",
+    "page.description": "G04EggX – der futuristische Eier-Timer für dein Smartphone.",
+    "language.label": "Sprache",
+    "language.english": "Englisch",
+    "language.german": "Deutsch",
+    "status.done": "Fertig",
+    "status.running": "Kocht",
+    "status.ready": "Bereit",
+    "preset.wachsweich": "Wachsw.",
+    "preset.weich": "Weich",
+    "preset.mittel": "Mittel",
+    "preset.hart": "Hart",
+    "preset.sehrhart": "S. Hart",
+    "sound.chime": "Chime",
+    "sound.beep": "Beep",
+    "sound.melodie": "Melodie",
+    "sound.puls": "Puls",
+    "sound.sirene": "Sirene",
+    "unit.minutes": "Min",
+    "alarm.label": "Alarmton",
+    "button.stop": "Stopp",
+    "button.pause": "Pause",
+    "button.start": "Start",
+    "button.resume": "Weiter",
+    "button.reset": "Zurücksetzen",
+    "done.message": "Dein Ei ist perfekt {hardness} gekocht 🥚",
+    "link.privacy": "Datenschutz",
+    "link.imprint": "Impressum / Copyright",
+    "push.serverNotConfigured": "Der Push-Server ist noch nicht konfiguriert",
+    "push.addToHome": "Für Push zum Home-Bildschirm hinzufügen",
+    "push.unsupported": "Push wird nicht unterstützt",
+    "push.active": "Mitteilungen aktiv",
+    "push.firstStart": "Mitteilungen werden beim ersten Start aktiviert",
+    "push.offline": "Offline-Funktion konnte nicht gestartet werden",
+    "push.timerScheduled": "Mitteilung für Timerende geplant",
+    "push.serverDisconnected": "Der Cloudflare Push-Server ist noch nicht verbunden",
+    "push.homeScreenFirst": "G04EggX zuerst zum iPhone-Home-Bildschirm hinzufügen und von dort öffnen",
+    "push.backgroundUnsupported": "Dieser Browser unterstützt keine Hintergrund-Mitteilungen",
+    "push.permissionDenied": "Mitteilungen wurden nicht erlaubt",
+    "push.serverUnavailable": "Der Push-Server ist nicht erreichbar",
+    "push.notReady": "Der Push-Server ist noch nicht vollständig eingerichtet",
+    "push.serviceWorkerUnsupported": "Service Worker werden nicht unterstützt",
+    "push.noSubscription": "Keine aktive Push-Anmeldung gefunden",
+    "push.timerPauseError": "Hintergrund-Timer konnte nicht angehalten werden",
+    "push.timerScheduleError": "Hintergrund-Timer konnte nicht geplant werden",
+    "push.enableError": "Mitteilungen konnten nicht aktiviert werden",
+  },
+};
+
+function translate(language, key, variables = {}) {
+  const languageTable = TRANSLATIONS[language] || TRANSLATIONS.en;
+  const value = languageTable[key] || TRANSLATIONS.en[key] || key;
+  return Object.entries(variables).reduce(
+    (result, [name, replacement]) => result.split(`{${name}}`).join(String(replacement)),
+    value,
+  );
+}
 
 const PUSH_API_URL = String(window.EGGX_PUSH_API || "").replace(/\/$/, "");
 
@@ -212,8 +320,16 @@ function playSound(soundId, ctx) {
 }
 
 function G04EggX() {
+  // Englisch ist beim allerersten Start die Standardsprache. Eine bewusste
+  // Auswahl wird lokal gespeichert und beim nächsten Öffnen wieder verwendet.
+  const [language, setLanguage] = useState(() => {
+    const stored = localStorage.getItem("eggx_language");
+    return stored === "de" ? "de" : "en";
+  });
+  const t = useCallback((key, variables = {}) => translate(language, key, variables), [language]);
   const [presetId, setPresetId] = useState("mittel");
   const preset = PRESETS.find((p) => p.id === presetId);
+  const presetLabel = t(`preset.${preset.id}`);
   const total = preset.minutes * 60;
 
   const [soundId, setSoundId] = useState(() => localStorage.getItem("eggx_soundId") || "chime");
@@ -230,31 +346,39 @@ function G04EggX() {
   const endTimeRef = useRef(null); // Zielzeitpunkt (Date.now() + Restzeit), nicht einfach runterzaehlen
 
   useEffect(() => {
+    localStorage.setItem("eggx_language", language);
+    document.documentElement.lang = language;
+    document.title = t("page.title");
+    const description = document.querySelector('meta[name="description"]');
+    if (description) description.setAttribute("content", t("page.description"));
+  }, [language, t]);
+
+  useEffect(() => {
     soundIdRef.current = soundId;
     localStorage.setItem("eggx_soundId", soundId);
   }, [soundId]);
 
   useEffect(() => {
     if (!PUSH_API_URL) {
-      setPushStatus("Push-Server noch nicht verbunden");
+      setPushStatus(t("push.serverNotConfigured"));
     } else if (!pushSupported()) {
-      setPushStatus(isIOSDevice() && !isStandaloneApp() ? "Für Push zum Home-Bildschirm hinzufügen" : "Push wird nicht unterstützt");
+      setPushStatus(isIOSDevice() && !isStandaloneApp() ? t("push.addToHome") : t("push.unsupported"));
     } else if (Notification.permission === "denied") {
       setPushStatus("");
     } else {
-      setPushStatus(pushEnabled ? "Mitteilungen aktiv" : "Mitteilungen werden beim ersten Start aktiviert");
+      setPushStatus(pushEnabled ? t("push.active") : t("push.firstStart"));
     }
-  }, [pushEnabled]);
+  }, [pushEnabled, language, t]);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
-    navigator.serviceWorker.register("./sw.js?v=1", { updateViaCache: "none" })
+    navigator.serviceWorker.register("./sw.js?v=3", { updateViaCache: "none" })
       .then(async (registration) => {
         serviceWorkerRef.current = registration;
         await registration.update();
       })
-      .catch(() => setPushStatus("Offline-Funktion konnte nicht gestartet werden"));
-  }, []);
+      .catch(() => setPushStatus(t("push.offline")));
+  }, [t]);
 
   const clearAlarm = useCallback(() => {
     if (alarmIntervalRef.current) {
@@ -317,17 +441,17 @@ function G04EggX() {
 
   const getPushRegistration = useCallback(async () => {
     if (serviceWorkerRef.current) return serviceWorkerRef.current;
-    if (!("serviceWorker" in navigator)) throw new Error("Service Worker werden nicht unterstützt.");
+    if (!("serviceWorker" in navigator)) throw new Error(t("push.serviceWorkerUnsupported"));
     const registration = await navigator.serviceWorker.ready;
     serviceWorkerRef.current = registration;
     return registration;
-  }, []);
+  }, [t]);
 
   const syncPushSchedule = useCallback(async (triggerAt, subscription) => {
     if (!PUSH_API_URL) return;
     const registration = await getPushRegistration();
     const activeSubscription = subscription || await registration.pushManager.getSubscription();
-    if (!activeSubscription) throw new Error("Keine aktive Push-Anmeldung gefunden.");
+    if (!activeSubscription) throw new Error(t("push.noSubscription"));
     const { deviceId } = getPushIdentity();
     await pushRequest(`/api/devices/${encodeURIComponent(deviceId)}`, {
       method: "PUT",
@@ -337,12 +461,13 @@ function G04EggX() {
           enabled: Boolean(triggerAt),
           triggerAt: triggerAt || 0,
           presetId: preset.id,
-          presetLabel: preset.label,
+          presetLabel,
+          language,
         },
       }),
     });
-    setPushStatus(triggerAt ? "Mitteilung für Timerende geplant" : "Mitteilungen aktiv");
-  }, [getPushRegistration, preset.id, preset.label, pushEnabled]);
+    setPushStatus(triggerAt ? t("push.timerScheduled") : t("push.active"));
+  }, [getPushRegistration, preset.id, presetLabel, t]);
 
   const cancelPushSchedule = useCallback(async () => {
     if (!PUSH_API_URL || !pushEnabled) return;
@@ -350,18 +475,18 @@ function G04EggX() {
   }, [pushEnabled, syncPushSchedule]);
 
   const enableBackgroundPush = useCallback(async () => {
-    if (!PUSH_API_URL) throw new Error("Der Cloudflare Push-Server ist noch nicht verbunden.");
+    if (!PUSH_API_URL) throw new Error(t("push.serverDisconnected"));
     if (!pushSupported()) {
-      if (isIOSDevice() && !isStandaloneApp()) throw new Error("G04EggX zuerst zum iPhone-Home-Bildschirm hinzufügen und von dort öffnen.");
-      throw new Error("Dieser Browser unterstützt keine Hintergrund-Mitteilungen.");
+      if (isIOSDevice() && !isStandaloneApp()) throw new Error(t("push.homeScreenFirst"));
+      throw new Error(t("push.backgroundUnsupported"));
     }
-    if (isIOSDevice() && !isStandaloneApp()) throw new Error("G04EggX zuerst zum iPhone-Home-Bildschirm hinzufügen und von dort öffnen.");
+    if (isIOSDevice() && !isStandaloneApp()) throw new Error(t("push.homeScreenFirst"));
     const permission = await Notification.requestPermission();
-    if (permission !== "granted") throw new Error("Mitteilungen wurden nicht erlaubt.");
+    if (permission !== "granted") throw new Error(t("push.permissionDenied"));
     const keyResponse = await fetch(`${PUSH_API_URL}/vapid-public-key`);
-    if (!keyResponse.ok) throw new Error("Der Push-Server ist nicht erreichbar.");
+    if (!keyResponse.ok) throw new Error(t("push.serverUnavailable"));
     const { publicKey } = await keyResponse.json();
-    if (!publicKey) throw new Error("Der Push-Server ist noch nicht vollständig eingerichtet.");
+    if (!publicKey) throw new Error(t("push.notReady"));
     const registration = await getPushRegistration();
     let subscription = await registration.pushManager.getSubscription();
     if (!subscription) {
@@ -373,7 +498,7 @@ function G04EggX() {
     await syncPushSchedule(running && endTimeRef.current ? endTimeRef.current : null, subscription);
     localStorage.setItem("eggx_pushEnabled", "true");
     setPushEnabled(true);
-  }, [getPushRegistration, running, syncPushSchedule]);
+  }, [getPushRegistration, running, syncPushSchedule, t]);
 
   useEffect(() => {
     if (running) {
@@ -407,14 +532,14 @@ function G04EggX() {
       if (endTimeRef.current) setRemaining(Math.max(0, Math.round((endTimeRef.current - Date.now()) / 1000)));
       endTimeRef.current = null;
       setRunning(false);
-      cancelPushSchedule().catch(() => setPushStatus("Hintergrund-Timer konnte nicht angehalten werden"));
+      cancelPushSchedule().catch(() => setPushStatus(t("push.timerPauseError")));
       return;
     }
     const triggerAt = Date.now() + remaining * 1000;
     endTimeRef.current = triggerAt;
     setRunning(true);
     if (pushEnabled) {
-      syncPushSchedule(triggerAt).catch((error) => setPushStatus(error.message || "Hintergrund-Timer konnte nicht geplant werden"));
+      syncPushSchedule(triggerAt).catch((error) => setPushStatus(error.message || t("push.timerScheduleError")));
     } else if (PUSH_API_URL) {
       // Die erste Nutzeraktion darf die iOS/Android-Berechtigungsabfrage öffnen.
       // Danach werden Push-Anmeldung und Timer automatisch synchronisiert.
@@ -422,9 +547,9 @@ function G04EggX() {
         .then(() => {
           if (endTimeRef.current === triggerAt) return syncPushSchedule(triggerAt);
         })
-        .catch((error) => setPushStatus(error.message || "Mitteilungen konnten nicht aktiviert werden"));
+        .catch((error) => setPushStatus(error.message || t("push.enableError")));
     } else {
-      setPushStatus("Push-Server noch nicht verbunden");
+      setPushStatus(t("push.serverNotConfigured"));
     }
   };
 
@@ -467,12 +592,26 @@ function G04EggX() {
             <span className="font-mono text-lg tracking-[0.15em] font-bold" style={{ color: glowColor, textShadow: `0 0 12px ${glowColor}` }}>
               G04EggX
             </span>
-            <span
-              className="text-[10px] uppercase tracking-[0.25em] font-bold px-2.5 py-1 rounded-full border"
-              style={{ color: glowColor, borderColor: `${glowColor}66`, textShadow: `0 0 8px ${glowColor}` }}
-            >
-              {done ? "Fertig" : running ? "Kocht" : "Bereit"}
-            </span>
+            <div className="flex items-center gap-2">
+              <label htmlFor="language-select" className="sr-only">{t("language.label")}</label>
+              <select
+                id="language-select"
+                value={language}
+                onChange={(event) => setLanguage(event.target.value === "de" ? "de" : "en")}
+                className="rounded-full border bg-[#0B0D1F] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] focus:outline-none focus-visible:ring-2"
+                style={{ color: glowColor, borderColor: `${glowColor}66` }}
+                aria-label={t("language.label")}
+              >
+                <option value="en">EN</option>
+                <option value="de">DE</option>
+              </select>
+              <span
+                className="text-[10px] uppercase tracking-[0.25em] font-bold px-2.5 py-1 rounded-full border"
+                style={{ color: glowColor, borderColor: `${glowColor}66`, textShadow: `0 0 8px ${glowColor}` }}
+              >
+                {done ? t("status.done") : running ? t("status.running") : t("status.ready")}
+              </span>
+            </div>
           </div>
 
           <div className="egg-stage relative flex flex-1 min-h-0 flex-col items-center justify-center mb-2">
@@ -591,7 +730,7 @@ function G04EggX() {
               {formatTime(remaining)}
             </div>
             <div className="mt-3 text-sm font-medium" style={{ color: glowColor }}>
-              {preset.label} · {preset.minutes} Min
+              {presetLabel} · {preset.minutes} {t("unit.minutes")}
             </div>
           </div>
 
@@ -602,7 +741,7 @@ function G04EggX() {
               role="status"
               aria-live="assertive"
             >
-              Dein Ei ist perfekt {preset.label.toLowerCase()} gekocht 🥚
+              {t("done.message", { hardness: presetLabel.toLowerCase() })}
             </div>
           )}
 
@@ -619,13 +758,13 @@ function G04EggX() {
                   boxShadow: p.id === presetId ? `0 0 16px -4px ${p.neon}99` : "none",
                 }}
               >
-                {p.label}
-                <span className="block text-[10px] opacity-80 font-normal">{p.minutes} Min</span>
+                {t(`preset.${p.id}`)}
+                <span className="block text-[10px] opacity-80 font-normal">{p.minutes} {t("unit.minutes")}</span>
               </button>
             ))}
           </div>
 
-          <div className="grid grid-cols-5 gap-x-2.5 gap-y-1.5 mb-3 shrink-0" aria-label="Alarmton">
+          <div className="grid grid-cols-5 gap-x-2.5 gap-y-1.5 mb-3 shrink-0" aria-label={t("alarm.label")}>
             {SOUNDS.map((s) => (
               <button
                 key={s.id}
@@ -637,7 +776,7 @@ function G04EggX() {
                   backgroundColor: s.id === soundId ? `${glowColor}1A` : "transparent",
                 }}
               >
-                {s.label}
+                {t(`sound.${s.id}`)}
               </button>
             ))}
           </div>
@@ -650,21 +789,21 @@ function G04EggX() {
               style={{ background: `linear-gradient(90deg, ${preset.neon}, ${preset.neon2})`, boxShadow: `0 0 24px -4px ${glowColor}aa` }}
             >
               {running ? <Pause size={18} /> : <Play size={18} />}
-              {done ? "Stopp" : running ? "Pause" : remaining === total ? "Start" : "Weiter"}
+              {done ? t("button.stop") : running ? t("button.pause") : remaining === total ? t("button.start") : t("button.resume")}
             </button>
             <button
               onClick={reset}
               className="rounded-xl border p-3 hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0D1F]"
               style={{ borderColor: "#2A2C45", color: glowColor }}
-              aria-label="Zuruecksetzen"
+              aria-label={t("button.reset")}
             >
               <RotateCcw size={18} />
             </button>
           </div>
           <div className="legal-footer pt-1 text-center text-[9px] text-[#7A7E9E] shrink-0">
-            <a href="./datenschutz.html" className="underline-offset-2 hover:underline">Datenschutz</a>
+            <a href="./datenschutz.html" className="underline-offset-2 hover:underline">{t("link.privacy")}</a>
             <span aria-hidden="true"> · </span>
-            <a href="./impressum.html" className="underline-offset-2 hover:underline">Impressum / Copyright</a>
+            <a href="./impressum.html" className="underline-offset-2 hover:underline">{t("link.imprint")}</a>
           </div>
         </div>
       </div>

@@ -2,11 +2,20 @@ import webpush from "web-push";
 
 const encoder = new TextEncoder();
 const PRESET_NAMES = {
-  wachsweich: "wachsweich",
-  weich: "weich",
-  mittel: "mittel",
-  hart: "hart",
-  sehrhart: "sehr hart"
+  en: {
+    wachsweich: "very soft",
+    weich: "soft",
+    mittel: "medium",
+    hart: "hard",
+    sehrhart: "very hard"
+  },
+  de: {
+    wachsweich: "wachsweich",
+    weich: "weich",
+    mittel: "mittel",
+    hart: "hart",
+    sehrhart: "sehr hart"
+  }
 };
 
 function json(data, status = 200) {
@@ -53,15 +62,18 @@ function validTimer(timer) {
   if (!timer.enabled) return true;
   if (!Number.isFinite(timer.triggerAt)) return false;
   if (timer.triggerAt < Date.now() - 5000 || timer.triggerAt > Date.now() + 24 * 60 * 60 * 1000) return false;
-  return Object.hasOwn(PRESET_NAMES, timer.presetId);
+  return Object.hasOwn(PRESET_NAMES.en, timer.presetId);
 }
 
 async function sendNotification(env, subscription, timer, test = false) {
   webpush.setVapidDetails(env.VAPID_SUBJECT, env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY);
-  const hardness = PRESET_NAMES[timer?.presetId] || "perfekt";
+  const language = timer?.language === "de" ? "de" : "en";
+  const hardness = PRESET_NAMES[language][timer?.presetId] || (language === "de" ? "perfekt" : "perfectly");
   return webpush.sendNotification(subscription, JSON.stringify({
-    title: test ? "G04EggX Test" : "G04EggX – Fertig!",
-    body: test ? "Hintergrund-Mitteilungen funktionieren. 🥚" : `Dein Ei ist jetzt ${hardness} gekocht. 🥚`,
+    title: test ? "G04EggX Test" : language === "de" ? "G04EggX – Fertig!" : "G04EggX – Finished!",
+    body: test
+      ? language === "de" ? "Hintergrund-Mitteilungen funktionieren. 🥚" : "Background notifications are working. 🥚"
+      : language === "de" ? `Dein Ei ist jetzt ${hardness} gekocht. 🥚` : `Your egg is now cooked ${hardness}. 🥚`,
     tag: test ? "eggx-test" : "eggx-timer",
     url: env.APP_URL
   }), { TTL: 300, urgency: "high" });
