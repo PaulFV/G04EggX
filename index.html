@@ -287,7 +287,8 @@ function playSound(soundId, ctx) {
   try {
     if (!ctx) return;
     if (ctx.state === "suspended") {
-      ctx.resume();
+      const resumeResult = ctx.resume();
+      if (resumeResult && typeof resumeResult.catch === "function") resumeResult.catch(() => {});
     }
 
     const tone = (freq, start, dur, type = "sine", peak = 0.22) => {
@@ -320,8 +321,6 @@ function playSound(soundId, ctx) {
 }
 
 function G04EggX() {
-  // Englisch ist beim allerersten Start die Standardsprache. Eine bewusste
-  // Auswahl wird lokal gespeichert und beim nächsten Öffnen wieder verwendet.
   const [language, setLanguage] = useState(() => {
     const stored = localStorage.getItem("eggx_language");
     return stored === "de" ? "de" : "en";
@@ -343,7 +342,7 @@ function G04EggX() {
   const audioCtxRef = useRef(null);
   const serviceWorkerRef = useRef(null);
   const soundIdRef = useRef(soundId);
-  const endTimeRef = useRef(null); // Zielzeitpunkt (Date.now() + Restzeit), nicht einfach runterzaehlen
+  const endTimeRef = useRef(null);
 
   useEffect(() => {
     localStorage.setItem("eggx_language", language);
@@ -393,7 +392,8 @@ function G04EggX() {
     setDone(true);
     setRemaining(0);
     if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
-      audioCtxRef.current.resume();
+      const resumeResult = audioCtxRef.current.resume();
+      if (resumeResult && typeof resumeResult.catch === "function") resumeResult.catch(() => {});
     }
     playSound(soundIdRef.current, audioCtxRef.current);
     if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 600]);
@@ -408,9 +408,7 @@ function G04EggX() {
     if (!endTimeRef.current) return;
     const secondsLeft = Math.max(0, Math.round((endTimeRef.current - Date.now()) / 1000));
     setRemaining(secondsLeft);
-    if (secondsLeft <= 0) {
-      finishTimer();
-    }
+    if (secondsLeft <= 0) finishTimer();
   }, [finishTimer]);
 
   const selectPreset = useCallback((id) => {
@@ -425,18 +423,24 @@ function G04EggX() {
   }, [clearAlarm]);
 
   const unlockAudio = useCallback(() => {
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!audioCtxRef.current) {
-      audioCtxRef.current = new Ctx();
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      if (!audioCtxRef.current) audioCtxRef.current = new Ctx();
+      const ctx = audioCtxRef.current;
+      if (!ctx) return;
+      if (ctx.state === "suspended") {
+        const resumeResult = ctx.resume();
+        if (resumeResult && typeof resumeResult.catch === "function") resumeResult.catch(() => {});
+      }
+      const buffer = ctx.createBuffer(1, 1, 22050);
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      src.connect(ctx.destination);
+      src.start(0);
+    } catch (error) {
+      console.warn("G04EggX: Audio nicht verfügbar – Timer läuft ohne Ton.");
     }
-    if (audioCtxRef.current.state === "suspended") {
-      audioCtxRef.current.resume();
-    }
-    const buffer = audioCtxRef.current.createBuffer(1, 1, 22050);
-    const src = audioCtxRef.current.createBufferSource();
-    src.buffer = buffer;
-    src.connect(audioCtxRef.current.destination);
-    src.start(0);
   }, []);
 
   const getPushRegistration = useCallback(async () => {
@@ -490,10 +494,7 @@ function G04EggX() {
     const registration = await getPushRegistration();
     let subscription = await registration.pushManager.getSubscription();
     if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: base64UrlToBytes(publicKey),
-      });
+      subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: base64UrlToBytes(publicKey) });
     }
     await syncPushSchedule(running && endTimeRef.current ? endTimeRef.current : null, subscription);
     localStorage.setItem("eggx_pushEnabled", "true");
@@ -504,12 +505,8 @@ function G04EggX() {
     if (running) {
       if (!endTimeRef.current) endTimeRef.current = Date.now() + remaining * 1000;
       intervalRef.current = setInterval(tick, 1000);
-
-      const handleVisibility = () => {
-        if (document.visibilityState === "visible") tick();
-      };
+      const handleVisibility = () => { if (document.visibilityState === "visible") tick(); };
       document.addEventListener("visibilitychange", handleVisibility);
-
       return () => {
         clearInterval(intervalRef.current);
         document.removeEventListener("visibilitychange", handleVisibility);
@@ -526,7 +523,6 @@ function G04EggX() {
       return;
     }
     if (remaining === 0) return;
-    unlockAudio();
     clearAlarm();
     if (running) {
       if (endTimeRef.current) setRemaining(Math.max(0, Math.round((endTimeRef.current - Date.now()) / 1000)));
@@ -538,11 +534,10 @@ function G04EggX() {
     const triggerAt = Date.now() + remaining * 1000;
     endTimeRef.current = triggerAt;
     setRunning(true);
+    unlockAudio();
     if (pushEnabled) {
       syncPushSchedule(triggerAt).catch((error) => setPushStatus(error.message || t("push.timerScheduleError")));
     } else if (PUSH_API_URL) {
-      // Die erste Nutzeraktion darf die iOS/Android-Berechtigungsabfrage öffnen.
-      // Danach werden Push-Anmeldung und Timer automatisch synchronisiert.
       enableBackgroundPush()
         .then(() => {
           if (endTimeRef.current === triggerAt) return syncPushSchedule(triggerAt);
@@ -564,7 +559,6 @@ function G04EggX() {
 
   const progress = 1 - remaining / total;
   const glowColor = done ? preset.neon2 : preset.neon;
-
   const yolkProgress = progress * preset.finalHardness;
   const yolkRadius = 66 - yolkProgress * 40;
   const yolkCenter = lerpColor("#FFDD55", "#F4C542", yolkProgress);
@@ -574,303 +568,73 @@ function G04EggX() {
   const yolkLiquidScale = 58 * (1 - yolkProgress);
 
   return (
-    <div
-      className="w-full h-full flex items-center justify-center relative overflow-hidden"
-      style={{ width: "100vw", height: "100dvh", background: "#000000" }}
-      onClick={() => {
-        if (done) {
-          clearAlarm();
-          setDone(false);
-        }
-      }}
-    >
-      <div
-        className="app-shell w-full bg-[#0B0D1F]/40 relative z-10 flex flex-col"
-      >
+    <div className="w-full h-full flex items-center justify-center relative overflow-hidden" style={{ width: "100vw", height: "100dvh", background: "#000000" }} onClick={() => { if (done) { clearAlarm(); setDone(false); } }}>
+      <div className="app-shell w-full bg-[#0B0D1F]/40 relative z-10 flex flex-col">
         <div className="app-content w-full h-full mx-auto flex flex-col" style={{ maxWidth: "430px" }}>
           <div className="flex items-center justify-between mb-2 shrink-0">
-            <span className="font-mono text-lg tracking-[0.15em] font-bold" style={{ color: glowColor, textShadow: `0 0 12px ${glowColor}` }}>
-              G04EggX
-            </span>
+            <span className="font-mono text-lg tracking-[0.15em] font-bold" style={{ color: glowColor, textShadow: `0 0 12px ${glowColor}` }}>G04EggX</span>
             <div className="flex items-center gap-2">
               <label htmlFor="language-select" className="sr-only">{t("language.label")}</label>
-              <select
-                id="language-select"
-                value={language}
-                onChange={(event) => setLanguage(event.target.value === "de" ? "de" : "en")}
-                className="rounded-full border bg-[#0B0D1F] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] focus:outline-none focus-visible:ring-2"
-                style={{ color: glowColor, borderColor: `${glowColor}66` }}
-                aria-label={t("language.label")}
-              >
-                <option value="en">EN</option>
-                <option value="de">DE</option>
+              <select id="language-select" value={language} onChange={(event) => setLanguage(event.target.value === "de" ? "de" : "en")} className="rounded-full border bg-[#0B0D1F] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] focus:outline-none focus-visible:ring-2" style={{ color: glowColor, borderColor: `${glowColor}66` }} aria-label={t("language.label")}>
+                <option value="en">EN</option><option value="de">DE</option>
               </select>
-              <span
-                className="text-[10px] uppercase tracking-[0.25em] font-bold px-2.5 py-1 rounded-full border"
-                style={{ color: glowColor, borderColor: `${glowColor}66`, textShadow: `0 0 8px ${glowColor}` }}
-              >
-                {done ? t("status.done") : running ? t("status.running") : t("status.ready")}
-              </span>
+              <span className="text-[10px] uppercase tracking-[0.25em] font-bold px-2.5 py-1 rounded-full border" style={{ color: glowColor, borderColor: `${glowColor}66`, textShadow: `0 0 8px ${glowColor}` }}>{done ? t("status.done") : running ? t("status.running") : t("status.ready")}</span>
             </div>
           </div>
 
           <div className="egg-stage relative flex flex-1 min-h-0 flex-col items-center justify-center mb-2">
-            {running && (
-              <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-                {Array.from({ length: 30 }).map((_, i) => {
-                  const left = -4 + i * 3.7;
-                  const dir = i % 2 === 0 ? 1 : -1;
-                  const size = 9 + ((i * 7) % 7);
-                  const delay = (i * 0.11) % 1.3;
-                  return (
-                    <span
-                      key={i}
-                      className="absolute block rounded-full"
-                      style={{
-                        left: `${left}%`,
-                        bottom: "8%",
-                        width: `${size}px`,
-                        height: `${size}px`,
-                        background: "radial-gradient(circle, rgba(235,232,222,0.95) 0%, rgba(235,232,222,0) 72%)",
-                        opacity: 0,
-                        "--dir": dir,
-                        animation: `smokeRise 2.2s ease-out ${delay}s infinite`,
-                      }}
-                    />
-                  );
-                })}
-              </div>
-            )}
+            {running && <div className="absolute inset-0 pointer-events-none" aria-hidden="true">{Array.from({ length: 30 }).map((_, i) => { const left = -4 + i * 3.7; const dir = i % 2 === 0 ? 1 : -1; const size = 9 + ((i * 7) % 7); const delay = (i * 0.11) % 1.3; return <span key={i} className="absolute block rounded-full" style={{ left: `${left}%`, bottom: "8%", width: `${size}px`, height: `${size}px`, background: "radial-gradient(circle, rgba(235,232,222,0.95) 0%, rgba(235,232,222,0) 72%)", opacity: 0, "--dir": dir, animation: `smokeRise 2.2s ease-out ${delay}s infinite` }} />; })}</div>}
 
-            <svg
-              viewBox="0 0 160 192"
-              style={
-                running
-                  ? {
-                      width: "clamp(154px, 52vw, 260px)",
-                      maxHeight: "min(43dvh, 280px)",
-                      height: "auto",
-                      animationName: "eggBoil, eggPulse",
-                      animationDuration: `${(1.9 - progress * 1.2).toFixed(2)}s, ${(2.6 - progress * 1.2).toFixed(2)}s`,
-                      animationTimingFunction: "ease-in-out, ease-in-out",
-                      animationIterationCount: "infinite, infinite",
-                      "--amt": (progress * 1.5).toFixed(2),
-                    }
-                  : done
-                  ? {
-                      width: "clamp(154px, 52vw, 260px)",
-                      maxHeight: "min(43dvh, 280px)",
-                      height: "auto",
-                      animationName: "eggAlarmJump, eggPulse",
-                      animationDuration: "0.5s, 0.5s",
-                      animationTimingFunction: "ease-in-out, ease-in-out",
-                      animationIterationCount: "infinite, infinite",
-                    }
-                  : {
-                      width: "clamp(154px, 52vw, 260px)",
-                      maxHeight: "min(43dvh, 280px)",
-                      height: "auto",
-                      animationName: "eggFloat",
-                      animationDuration: "3.6s",
-                      animationTimingFunction: "ease-in-out",
-                      animationIterationCount: "infinite",
-                    }
-              }
-            >
+            <svg viewBox="0 0 160 192" style={running ? { width: "clamp(154px, 52vw, 260px)", maxHeight: "min(43dvh, 280px)", height: "auto", animationName: "eggBoil, eggPulse", animationDuration: `${(1.9 - progress * 1.2).toFixed(2)}s, ${(2.6 - progress * 1.2).toFixed(2)}s`, animationTimingFunction: "ease-in-out, ease-in-out", animationIterationCount: "infinite, infinite", "--amt": (progress * 1.5).toFixed(2) } : done ? { width: "clamp(154px, 52vw, 260px)", maxHeight: "min(43dvh, 280px)", height: "auto", animationName: "eggAlarmJump, eggPulse", animationDuration: "0.5s, 0.5s", animationTimingFunction: "ease-in-out, ease-in-out", animationIterationCount: "infinite, infinite" } : { width: "clamp(154px, 52vw, 260px)", maxHeight: "min(43dvh, 280px)", height: "auto", animationName: "eggFloat", animationDuration: "3.6s", animationTimingFunction: "ease-in-out", animationIterationCount: "infinite" }}>
               <defs>
-                <clipPath id="eggClipBig">
-                  <path d="M80 8 C118 8 144 70 144 116 C144 156 116 184 80 184 C44 184 16 156 16 116 C16 70 42 8 80 8 Z" />
-                </clipPath>
-                <radialGradient id="yolkGrad" cx="35%" cy="30%" r="75%">
-                  <stop offset="0%" stopColor={yolkCenter} />
-                  <stop offset="100%" stopColor={yolkEdge} />
-                </radialGradient>
-                <filter id="yolkLiquid" x="-60%" y="-60%" width="220%" height="220%">
-                  <feTurbulence type="fractalNoise" baseFrequency="0.014" numOctaves="2" seed="3" result="turb">
-                    <animate attributeName="baseFrequency" values="0.01;0.026;0.01" dur="26s" repeatCount="indefinite" />
-                  </feTurbulence>
-                  <feDisplacementMap in="SourceGraphic" in2="turb" scale={yolkLiquidScale} xChannelSelector="R" yChannelSelector="G" />
-                </filter>
+                <clipPath id="eggClipBig"><path d="M80 8 C118 8 144 70 144 116 C144 156 116 184 80 184 C44 184 16 156 16 116 C16 70 42 8 80 8 Z" /></clipPath>
+                <radialGradient id="yolkGrad" cx="35%" cy="30%" r="75%"><stop offset="0%" stopColor={yolkCenter} /><stop offset="100%" stopColor={yolkEdge} /></radialGradient>
+                <filter id="yolkLiquid" x="-60%" y="-60%" width="220%" height="220%"><feTurbulence type="fractalNoise" baseFrequency="0.014" numOctaves="2" seed="3" result="turb"><animate attributeName="baseFrequency" values="0.01;0.026;0.01" dur="26s" repeatCount="indefinite" /></feTurbulence><feDisplacementMap in="SourceGraphic" in2="turb" scale={yolkLiquidScale} xChannelSelector="R" yChannelSelector="G" /></filter>
               </defs>
-
               <g clipPath="url(#eggClipBig)">
-                <path
-                  d="M80 8 C118 8 144 70 144 116 C144 156 116 184 80 184 C44 184 16 156 16 116 C16 70 42 8 80 8 Z"
-                  fill="#FFFFFF"
-                  stroke="#E7E2D2"
-                  strokeWidth="2.5"
-                />
-                {running && (
-                  <rect x="0" y="0" width="160" height="10" fill={glowColor} opacity="0.35" style={{ animation: "scanLine 5s linear infinite" }} />
-                )}
-                <g
-                  style={{
-                    transformOrigin: "80px 100px",
-                    animation: running ? "yolkWobble 13s ease-in-out infinite" : "none",
-                    "--wobble": yolkWobble,
-                  }}
-                >
+                <path d="M80 8 C118 8 144 70 144 116 C144 156 116 184 80 184 C44 184 16 156 16 116 C16 70 42 8 80 8 Z" fill="#FFFFFF" stroke="#E7E2D2" strokeWidth="2.5" />
+                {running && <rect x="0" y="0" width="160" height="10" fill={glowColor} opacity="0.35" style={{ animation: "scanLine 5s linear infinite" }} />}
+                <g style={{ transformOrigin: "80px 100px", animation: running ? "yolkWobble 13s ease-in-out infinite" : "none", "--wobble": yolkWobble }}>
                   <circle cx="80" cy="100" r={yolkRadius} fill="url(#yolkGrad)" stroke="rgba(0,0,0,0.18)" strokeWidth="1" filter="url(#yolkLiquid)" />
-                  <ellipse
-                    cx={80 - yolkRadius * 0.35}
-                    cy={100 - yolkRadius * 0.4}
-                    rx={yolkRadius * 0.32}
-                    ry={yolkRadius * 0.2}
-                    fill="#FFFFFF"
-                    opacity={yolkHighlight}
-                  />
+                  <ellipse cx={80 - yolkRadius * 0.35} cy={100 - yolkRadius * 0.4} rx={yolkRadius * 0.32} ry={yolkRadius * 0.2} fill="#FFFFFF" opacity={yolkHighlight} />
                 </g>
               </g>
             </svg>
 
-            <div
-              className="mt-5 font-mono tabular-nums tracking-tight font-bold"
-              style={{ fontSize: "clamp(34px, 11.5vw, 52px)", color: "#F4F6FF", textShadow: `0 0 18px ${glowColor}99, 0 0 4px ${glowColor}` }}
-            >
-              {formatTime(remaining)}
-            </div>
-            <div className="mt-3 text-sm font-medium" style={{ color: glowColor }}>
-              {presetLabel} · {preset.minutes} {t("unit.minutes")}
-            </div>
+            <div className="mt-5 font-mono tabular-nums tracking-tight font-bold" style={{ fontSize: "clamp(34px, 11.5vw, 52px)", color: "#F4F6FF", textShadow: `0 0 18px ${glowColor}99, 0 0 4px ${glowColor}` }}>{formatTime(remaining)}</div>
+            <div className="mt-3 text-sm font-medium" style={{ color: glowColor }}>{presetLabel} · {preset.minutes} {t("unit.minutes")}</div>
           </div>
 
-          {done && (
-            <div
-              className="mb-2 rounded-xl px-3 py-1.5 text-xs text-center font-semibold border shrink-0"
-              style={{ backgroundColor: `${glowColor}1A`, color: glowColor, borderColor: `${glowColor}55` }}
-              role="status"
-              aria-live="assertive"
-            >
-              {t("done.message", { hardness: presetLabel.toLowerCase() })}
-            </div>
-          )}
+          {done && <div className="mb-2 rounded-xl px-3 py-1.5 text-xs text-center font-semibold border shrink-0" style={{ backgroundColor: `${glowColor}1A`, color: glowColor, borderColor: `${glowColor}55` }} role="status" aria-live="assertive">{t("done.message", { hardness: presetLabel.toLowerCase() })}</div>}
 
-          <div className="grid grid-cols-5 gap-x-2.5 gap-y-1.5 mb-4 shrink-0">
-            {PRESETS.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => selectPreset(p.id)}
-                className="min-w-0 rounded-lg px-1 py-2 text-[10px] sm:text-xs font-bold border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0D1F]"
-                style={{
-                  borderColor: p.id === presetId ? p.neon : "#2A2C45",
-                  backgroundColor: p.id === presetId ? `${p.neon}1A` : "transparent",
-                  color: p.id === presetId ? p.neon : "#7A7E9E",
-                  boxShadow: p.id === presetId ? `0 0 16px -4px ${p.neon}99` : "none",
-                }}
-              >
-                {t(`preset.${p.id}`)}
-                <span className="block text-[10px] opacity-80 font-normal">{p.minutes} {t("unit.minutes")}</span>
-              </button>
-            ))}
-          </div>
+          <div className="grid grid-cols-5 gap-x-2.5 gap-y-1.5 mb-4 shrink-0">{PRESETS.map((p) => <button key={p.id} onClick={() => selectPreset(p.id)} className="min-w-0 rounded-lg px-1 py-2 text-[10px] sm:text-xs font-bold border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0D1F]" style={{ borderColor: p.id === presetId ? p.neon : "#2A2C45", backgroundColor: p.id === presetId ? `${p.neon}1A` : "transparent", color: p.id === presetId ? p.neon : "#7A7E9E", boxShadow: p.id === presetId ? `0 0 16px -4px ${p.neon}99` : "none" }}>{t(`preset.${p.id}`)}<span className="block text-[10px] opacity-80 font-normal">{p.minutes} {t("unit.minutes")}</span></button>)}</div>
 
-          <div className="grid grid-cols-5 gap-x-2.5 gap-y-1.5 mb-3 shrink-0" aria-label={t("alarm.label")}>
-            {SOUNDS.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => setSoundId(s.id)}
-                className="min-w-0 truncate rounded-lg px-1 py-1.5 text-[10px] font-semibold border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0D1F]"
-                style={{
-                  borderColor: s.id === soundId ? glowColor : "#2A2C45",
-                  color: s.id === soundId ? glowColor : "#7A7E9E",
-                  backgroundColor: s.id === soundId ? `${glowColor}1A` : "transparent",
-                }}
-              >
-                {t(`sound.${s.id}`)}
-              </button>
-            ))}
-          </div>
+          <div className="grid grid-cols-5 gap-x-2.5 gap-y-1.5 mb-3 shrink-0" aria-label={t("alarm.label")}>{SOUNDS.map((s) => <button key={s.id} onClick={() => setSoundId(s.id)} className="min-w-0 truncate rounded-lg px-1 py-1.5 text-[10px] font-semibold border transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0D1F]" style={{ borderColor: s.id === soundId ? glowColor : "#2A2C45", color: s.id === soundId ? glowColor : "#7A7E9E", backgroundColor: s.id === soundId ? `${glowColor}1A` : "transparent" }}>{t(`sound.${s.id}`)}</button>)}</div>
 
           <div className="bottom-controls flex items-center gap-3 shrink-0">
-            <button
-              onClick={toggleRunning}
-              disabled={remaining === 0 && !done}
-              className="flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 font-bold text-[#05060F] disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0D1F]"
-              style={{ background: `linear-gradient(90deg, ${preset.neon}, ${preset.neon2})`, boxShadow: `0 0 24px -4px ${glowColor}aa` }}
-            >
+            <button onClick={toggleRunning} disabled={remaining === 0 && !done} className="flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 font-bold text-[#05060F] disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0D1F]" style={{ background: `linear-gradient(90deg, ${preset.neon}, ${preset.neon2})`, boxShadow: `0 0 24px -4px ${glowColor}aa` }}>
               {running ? <Pause size={18} /> : <Play size={18} />}
               {done ? t("button.stop") : running ? t("button.pause") : remaining === total ? t("button.start") : t("button.resume")}
             </button>
-            <button
-              onClick={reset}
-              className="rounded-xl border p-3 hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0D1F]"
-              style={{ borderColor: "#2A2C45", color: glowColor }}
-              aria-label={t("button.reset")}
-            >
-              <RotateCcw size={18} />
-            </button>
+            <button onClick={reset} className="rounded-xl border p-3 hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0D1F]" style={{ borderColor: "#2A2C45", color: glowColor }} aria-label={t("button.reset")}><RotateCcw size={18} /></button>
           </div>
-          <div className="legal-footer pt-1 text-center text-[9px] text-[#7A7E9E] shrink-0">
-            <a href="./datenschutz.html" className="underline-offset-2 hover:underline">{t("link.privacy")}</a>
-            <span aria-hidden="true"> · </span>
-            <a href="./impressum.html" className="underline-offset-2 hover:underline">{t("link.imprint")}</a>
-          </div>
+          <div className="legal-footer pt-1 text-center text-[9px] text-[#7A7E9E] shrink-0"><a href="./datenschutz.html" className="underline-offset-2 hover:underline">{t("link.privacy")}</a><span aria-hidden="true"> · </span><a href="./impressum.html" className="underline-offset-2 hover:underline">{t("link.imprint")}</a></div>
         </div>
       </div>
 
       <style>{`
-        .app-shell {
-          height: 100dvh;
-          padding-top: max(12px, var(--safe-top));
-          padding-right: max(14px, var(--safe-right));
-          padding-bottom: max(12px, var(--safe-bottom));
-          padding-left: max(14px, var(--safe-left));
-        }
-        @keyframes eggFloat {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-10px) rotate(0deg); }
-        }
-        @keyframes smokeRise {
-          0% { transform: translate(0, 0) scale(0.6); opacity: 0; filter: blur(0.5px); }
-          12% { opacity: 0.95; }
-          45% { transform: translate(calc(var(--dir, 1) * 14px), -70px) scale(1.3); opacity: 0.7; filter: blur(1.5px); }
-          75% { transform: translate(calc(var(--dir, 1) * -12px), -130px) scale(2); opacity: 0.4; filter: blur(2.5px); }
-          100% { transform: translate(calc(var(--dir, 1) * 10px), -195px) scale(2.6); opacity: 0; filter: blur(3.5px); }
-        }
-        @keyframes eggBoil {
-          0% { transform: translateY(0) rotate(0deg); }
-          20% { transform: translateY(calc(-7px * var(--amt, 1))) rotate(calc(-3deg * var(--amt, 1))); }
-          40% { transform: translateY(calc(1px * var(--amt, 1))) rotate(calc(2deg * var(--amt, 1))); }
-          60% { transform: translateY(calc(-9px * var(--amt, 1))) rotate(calc(-2deg * var(--amt, 1))); }
-          80% { transform: translateY(calc(2px * var(--amt, 1))) rotate(calc(3deg * var(--amt, 1))); }
-          100% { transform: translateY(0) rotate(0deg); }
-        }
-        @keyframes eggAlarmJump {
-          0% { transform: translate(0, 0) rotate(0deg); }
-          15% { transform: translate(-10px, -22px) rotate(-10deg); }
-          30% { transform: translate(8px, 2px) rotate(8deg); }
-          45% { transform: translate(-6px, -16px) rotate(-6deg); }
-          60% { transform: translate(10px, 0) rotate(10deg); }
-          75% { transform: translate(-8px, -20px) rotate(-8deg); }
-          90% { transform: translate(4px, 2px) rotate(4deg); }
-          100% { transform: translate(0, 0) rotate(0deg); }
-        }
-        @keyframes eggPulse {
-          0%, 100% { filter: brightness(1); }
-          50% { filter: brightness(1.15); }
-        }
-        @keyframes yolkWobble {
-          0%, 100% { transform: scale(1, 1); }
-          50% { transform: scale(calc(1 + var(--wobble)), calc(1 - var(--wobble))); }
-        }
-        @keyframes scanLine {
-          0% { transform: translateY(-10px); opacity: 0; }
-          15% { opacity: 0.6; }
-          85% { opacity: 0.6; }
-          100% { transform: translateY(190px); opacity: 0; }
-        }
+        .app-shell { height: 100dvh; padding-top: max(12px, var(--safe-top)); padding-right: max(14px, var(--safe-right)); padding-bottom: max(12px, var(--safe-bottom)); padding-left: max(14px, var(--safe-left)); }
+        @keyframes eggFloat { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-10px) rotate(0deg); } }
+        @keyframes smokeRise { 0% { transform: translate(0, 0) scale(0.6); opacity: 0; filter: blur(0.5px); } 12% { opacity: 0.95; } 45% { transform: translate(calc(var(--dir, 1) * 14px), -70px) scale(1.3); opacity: 0.7; filter: blur(1.5px); } 75% { transform: translate(calc(var(--dir, 1) * -12px), -130px) scale(2); opacity: 0.4; filter: blur(2.5px); } 100% { transform: translate(calc(var(--dir, 1) * 10px), -195px) scale(2.6); opacity: 0; filter: blur(3.5px); } }
+        @keyframes eggBoil { 0% { transform: translateY(0) rotate(0deg); } 20% { transform: translateY(calc(-7px * var(--amt, 1))) rotate(calc(-3deg * var(--amt, 1))); } 40% { transform: translateY(calc(1px * var(--amt, 1))) rotate(calc(2deg * var(--amt, 1))); } 60% { transform: translateY(calc(-9px * var(--amt, 1))) rotate(calc(-2deg * var(--amt, 1))); } 80% { transform: translateY(calc(2px * var(--amt, 1))) rotate(calc(3deg * var(--amt, 1))); } 100% { transform: translateY(0) rotate(0deg); } }
+        @keyframes eggAlarmJump { 0% { transform: translate(0, 0) rotate(0deg); } 15% { transform: translate(-10px, -22px) rotate(-10deg); } 30% { transform: translate(8px, 2px) rotate(8deg); } 45% { transform: translate(-6px, -16px) rotate(-6deg); } 60% { transform: translate(10px, 0) rotate(10deg); } 75% { transform: translate(-8px, -20px) rotate(-8deg); } 90% { transform: translate(4px, 2px) rotate(4deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
+        @keyframes eggPulse { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.15); } }
+        @keyframes yolkWobble { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(calc(1 + var(--wobble)), calc(1 - var(--wobble))); } }
+        @keyframes scanLine { 0% { transform: translateY(-10px); opacity: 0; } 15% { opacity: 0.6; } 85% { opacity: 0.6; } 100% { transform: translateY(190px); opacity: 0; } }
         div[style*="scrollbar-width"]::-webkit-scrollbar { display: none; }
-        @media (min-height: 760px) {
-          .bottom-controls, .legal-footer { transform: translateY(12px); }
-        }
-        @media (max-height: 700px) {
-          .app-shell { padding-top: max(8px, var(--safe-top)); padding-bottom: max(8px, var(--safe-bottom)); }
-          .egg-stage svg { max-height: 35dvh !important; }
-          .egg-stage { margin-bottom: 4px !important; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          * { animation: none !important; transition: none !important; }
-        }
+        @media (min-height: 760px) { .bottom-controls, .legal-footer { transform: translateY(12px); } }
+        @media (max-height: 700px) { .app-shell { padding-top: max(8px, var(--safe-top)); padding-bottom: max(8px, var(--safe-bottom)); } .egg-stage svg { max-height: 35dvh !important; } .egg-stage { margin-bottom: 4px !important; } }
+        @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
       `}</style>
     </div>
   );
