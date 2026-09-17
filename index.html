@@ -116,6 +116,7 @@ const TRANSLATIONS = {
     "sound.puls": "Pulse",
     "sound.sirene": "Siren",
     "unit.minutes": "min",
+    "progress.label": "Cooking progress",
     "alarm.label": "Alarm sound",
     "button.stop": "Stop",
     "button.pause": "Pause",
@@ -164,6 +165,7 @@ const TRANSLATIONS = {
     "sound.puls": "Puls",
     "sound.sirene": "Sirene",
     "unit.minutes": "Min",
+    "progress.label": "Kochfortschritt",
     "alarm.label": "Alarmton",
     "button.stop": "Stopp",
     "button.pause": "Pause",
@@ -572,6 +574,7 @@ function G04EggX() {
   const yolkHighlight = 0.55 - yolkProgress * 0.45;
   const yolkWobble = running ? (0.34 * (1 - yolkProgress)).toFixed(3) : "0";
   const yolkLiquidScale = 58 * (1 - yolkProgress);
+  const progressPercent = Math.round(progress * 100);
 
   return (
     <div
@@ -731,6 +734,24 @@ function G04EggX() {
             </div>
             <div className="mt-3 text-sm font-medium" style={{ color: glowColor }}>
               {presetLabel} · {preset.minutes} {t("unit.minutes")}
+            </div>
+            <div
+              className="mt-3 w-full max-w-[260px]"
+              role="progressbar"
+              aria-label={t("progress.label")}
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow={progressPercent}
+            >
+              <div className="h-1.5 overflow-hidden rounded-full border" style={{ borderColor: `${glowColor}55`, backgroundColor: `${glowColor}12` }}>
+                <div
+                  className="h-full rounded-full transition-[width] duration-500"
+                  style={{ width: `${progressPercent}%`, background: `linear-gradient(90deg, ${preset.neon}, ${preset.neon2})`, boxShadow: `0 0 10px ${glowColor}` }}
+                />
+              </div>
+              <div className="mt-1 text-[9px] uppercase tracking-[0.18em]" style={{ color: `${glowColor}BB` }}>
+                {t("progress.label")} · {progressPercent}%
+              </div>
             </div>
           </div>
 
