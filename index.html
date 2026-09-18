@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="google" content="notranslate" />
 <title>G04EggX – Egg Timer</title>
 <meta name="description" content="G04EggX – the futuristic egg timer for your phone." />
 <link rel="manifest" href="manifest.json" />
@@ -324,8 +325,11 @@ function playSound(soundId, ctx) {
 
 function G04EggX() {
   const [language, setLanguage] = useState(() => {
-    const stored = localStorage.getItem("eggx_language");
-    return stored === "de" ? "de" : "en";
+    // Nur eine bewusst gewählte Sprache wird gespeichert. Der alte Schlüssel
+    // "eggx_language" enthielt immer "en" als Standard, "de" war also eine echte Wahl.
+    const stored = localStorage.getItem("eggx_languageChoice") || (localStorage.getItem("eggx_language") === "de" ? "de" : null);
+    if (stored === "de" || stored === "en") return stored;
+    return (navigator.language || "").toLowerCase().startsWith("de") ? "de" : "en";
   });
   const t = useCallback((key, variables = {}) => translate(language, key, variables), [language]);
   const [presetId, setPresetId] = useState("mittel");
@@ -347,7 +351,6 @@ function G04EggX() {
   const endTimeRef = useRef(null);
 
   useEffect(() => {
-    localStorage.setItem("eggx_language", language);
     document.documentElement.lang = language;
     document.title = t("page.title");
     const description = document.querySelector('meta[name="description"]');
@@ -578,7 +581,7 @@ function G04EggX() {
             <span className="font-mono text-lg tracking-[0.15em] font-bold" style={{ color: glowColor, textShadow: `0 0 12px ${glowColor}` }}>G04EggX</span>
             <div className="flex items-center gap-2">
               <label htmlFor="language-select" className="sr-only">{t("language.label")}</label>
-              <select id="language-select" value={language} onChange={(event) => setLanguage(event.target.value === "de" ? "de" : "en")} className="rounded-full border bg-[#0B0D1F] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] focus:outline-none focus-visible:ring-2" style={{ color: glowColor, borderColor: `${glowColor}66` }} aria-label={t("language.label")}>
+              <select id="language-select" value={language} onChange={(event) => { const next = event.target.value === "de" ? "de" : "en"; localStorage.setItem("eggx_languageChoice", next); setLanguage(next); }} className="rounded-full border bg-[#0B0D1F] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] focus:outline-none focus-visible:ring-2" style={{ color: glowColor, borderColor: `${glowColor}66` }} aria-label={t("language.label")}>
                 <option value="en">EN</option><option value="de">DE</option>
               </select>
               <span className="text-[10px] uppercase tracking-[0.25em] font-bold px-2.5 py-1 rounded-full border" style={{ color: glowColor, borderColor: `${glowColor}66`, textShadow: `0 0 8px ${glowColor}` }}>{done ? t("status.done") : running ? t("status.running") : t("status.ready")}</span>

@@ -6,6 +6,7 @@
         android:allowBackup="false"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
+        android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
         android:resizeableActivity="true"
         android:supportsRtl="true"
         android:theme="@style/LauncherActivityTheme">
@@ -45,6 +46,15 @@
                     android:pathPrefix="/G04EggX/"
                     android:scheme="https" />
             </intent-filter>
+        </activity>
+
+        <!-- Wird von LauncherActivity für die Website-Einstellungen-Verknüpfung
+             aktiviert (z. B. wenn Edge der TWA-Browser ist). Fehlt der Eintrag,
+             stürzt die App beim Start ab. -->
+        <activity android:name="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity">
+            <meta-data
+                android:name="android.support.customtabs.trusted.MANAGE_SPACE_URL"
+                android:value="@string/launch_url" />
         </activity>
 
         <provider
