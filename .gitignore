@@ -3,3 +3,11 @@ android/build/
 android/app/build/
 android/upload-keystore.jks
 *.jks
+
+# Android Studio / lokale Build-Artefakte
+android/.idea/
+android/local.properties
+android/app/release/
+
+# JetBrains IDE
+.idea/

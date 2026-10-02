@@ -25,7 +25,7 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <script src="push-config.js"></script>
 
-<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
@@ -376,7 +376,7 @@ function G04EggX() {
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
-    navigator.serviceWorker.register("./sw.js?v=3", { updateViaCache: "none" })
+    navigator.serviceWorker.register("./sw.js?v=4", { updateViaCache: "none" })
       .then(async (registration) => {
         serviceWorkerRef.current = registration;
         await registration.update();

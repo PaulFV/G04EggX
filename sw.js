@@ -1,4 +1,4 @@
-const CACHE_NAME = "g04eggx-v3";
+const CACHE_NAME = "g04eggx-v4";
 const APP_ASSETS = [
   "./",
   "./index.html",
@@ -10,8 +10,26 @@ const APP_ASSETS = [
   "./icon-512.png"
 ];
 
+// React, Babel und Tailwind kommen vom CDN. Ohne sie bleibt die Seite offline
+// leer. Sie liefern teils keine CORS-Header, deshalb werden sie als
+// "no-cors" geholt und per put() abgelegt – cache.add() lehnt solche
+// Antworten ab. Schlaegt das fehl, bleibt die App trotzdem installierbar.
+const CDN_ASSETS = [
+  "https://cdn.tailwindcss.com/3.4.17",
+  "https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"
+];
+
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_ASSETS)));
+  event.waitUntil(caches.open(CACHE_NAME).then(async (cache) => {
+    await cache.addAll(APP_ASSETS);
+    await Promise.allSettled(CDN_ASSETS.map(async (url) => {
+      const response = await fetch(new Request(url, { mode: "no-cors", cache: "reload" }));
+      if (response.type === "error") throw new Error(url);
+      await cache.put(url, response);
+    }));
+  }));
   self.skipWaiting();
 });
 

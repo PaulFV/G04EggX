@@ -1,0 +1,3 @@
+# gradlew braucht LF und das Ausfuehrungsrecht, auch unter Windows
+android/gradlew text eol=lf
+*.jar binary
